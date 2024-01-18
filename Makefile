@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror -Wextra -std=c11
+CFLAGS = -Wall -Werror -Wpedantic -D_POSIX_SOURCE -Wextra -std=c11 -D_GNU_SOURCE
 
 all: clone_a1 clone_a2
 

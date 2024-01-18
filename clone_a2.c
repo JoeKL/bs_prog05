@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -56,6 +54,7 @@ int main()
     if ((pid = clone(calcNSumOfSquare, stack + STACK_SIZE, flags, (void *)&n)) == -1) //stack + STACK_SIZE is the top of the stack
     {
         perror("clone");
+        free(stack); // free the stack
         exit(1);
     }
 
@@ -66,6 +65,8 @@ int main()
     if (waitpid(pid, &status, 0) == -1)
     {
         perror("waitpid");
+        kill(pid, SIGTERM); // handling of SIGTERM not necessary since its not handling any important data
+        free(stack);        // free the stack
         exit(1);
     }
 
@@ -86,15 +87,7 @@ int main()
 
     printf("used stack: %d\n", STACK_SIZE - unused_stack);  // print the used stack size (STACK_SIZE - i) 
 
-    // // print stack to file
-    // FILE *fp;
-    // fp = fopen("stack", "wb");
-    // for (int i = 0; i < STACK_SIZE; i++)
-    // {
-    //     fwrite(&stack[i], 1, 1, fp);
-    // }
-    // fclose(fp);
-
+    free(stack); // free the stack
     
     return 0;
 }
