@@ -36,7 +36,7 @@ int main()
     // Allocate stack for child task.
     const int STACK_SIZE = 8192; // stack size is 8K because of ulimit -s
 
-    char *stack = malloc(STACK_SIZE); // malloc() allocates memory in bytes
+    unsigned char *stack = malloc(STACK_SIZE); // malloc() allocates memory in bytes
 
     if (!stack) // if malloc() failed
     {
