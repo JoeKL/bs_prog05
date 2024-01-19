@@ -2,6 +2,7 @@
 *.o
 *.out
 *.exe
+*.bin
 
 clone_a1
 clone_a2
