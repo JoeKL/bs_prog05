@@ -4,6 +4,7 @@
 #include <sched.h>
 #include <sys/wait.h>
 #include <stdint.h>
+#include <errno.h>
 
 int global_sum = 0; // global variable to store the sum of squares
 
@@ -30,28 +31,30 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    int n;
-    if(strtol(argv[1], NULL, 10) == 0) // if strtol() fails
-    {
-        perror("only positive integer argument allowed");
+    // wanted to use atoi() but behaviour is undefined if the string is not a valid integer
+    char *endptr; // Pointer to character after the last character used in the conversion
+    errno = 0;  // Set errno to 0 before the call to strtol()
+
+    int n = strtol(argv[1], &endptr, 10); // cast argv[1] to int
+
+    // Check for various possible errors
+    if (errno != 0 || *endptr != '\0' || argv[1] == endptr) {
+        perror("strtol");
         exit(1);
     }
-    else
-    {
-        n = strtol(argv[1], NULL, 10); // cast argv[1] to int
+
+    if (n < 0) {
+        perror("argument must be positive");
+        exit(1);
     }
+
 
     // Allocate stack for child task.
     // const int STACK_SIZE = 8192; // stack size is 8K because of ulimit -s
-    
-    const int STACK_SIZE = 13*16; // min size is 13*16 = 208 because malloc operates in buckets of 16 bytes 
+    const int STACK_SIZE = 13*16; // min size is 13*16 = 208 because malloc is 16 byte aligned
+
     // if i just use the 200 bytes needed for the stack, it will override the header of the malloc in front 
     // of the stack at position stack - 8 and a size of uint64_t (8 bytes)
-
-    // so basically malloc allocates one word more than requested and saves the size of the allocation in the first word
-    // https://stackoverflow.com/a/3479496
-
-    // "A 64 bit processor will have a 64 bit "word" size (and pointer size) so the extra word will be 8 bytes."
 
     unsigned char *stack;    // Start of stack buffer
     unsigned char *stackTop; // End of stack buffer

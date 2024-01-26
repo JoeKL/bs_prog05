@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <sched.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 int global_sum = 0; // global variable to store the sum of squares
 
@@ -29,15 +30,21 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    int n;
-    if(strtol(argv[1], NULL, 10) == 0) // if strtol() fails
-    {
-        perror("only positive integer argument allowed");
+    // wanted to use atoi() but behaviour is undefined if the string is not a valid integer
+    char *endptr; // Pointer to character after the last character used in the conversion
+    errno = 0;  // Set errno to 0 before the call to strtol()
+
+    int n = strtol(argv[1], &endptr, 10); // cast argv[1] to int
+
+    // Check for various possible errors
+    if (errno != 0 || *endptr != '\0' || argv[1] == endptr) {
+        perror("strtol");
         exit(1);
     }
-    else
-    {
-        n = strtol(argv[1], NULL, 10); // cast argv[1] to int
+
+    if (n < 0) {
+        perror("argument must be positive");
+        exit(1);
     }
 
     // Allocate stack for child task.
