@@ -22,12 +22,27 @@ static int calcNSumOfSquare(void *arg)
     return 0;
 }
 
-int main()
-{
-    int n = 100; // as parameter for function
+// n as cmd parameter at execution
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        perror("only one argument allowed");
+        exit(1);
+    }
+
+    int n;
+    if(strtol(argv[1], NULL, 10) == 0) // if strtol() fails
+    {
+        perror("only positive integer argument allowed");
+        exit(1);
+    }
+    else
+    {
+        n = strtol(argv[1], NULL, 10); // cast argv[1] to int
+    }
 
     // Allocate stack for child task.
     const int STACK_SIZE = 8192; // stack size is 8K because of ulimit -s
+
     unsigned char *stack; // Start of stack buffer
     unsigned char *stackTop; // End of stack buffer
     

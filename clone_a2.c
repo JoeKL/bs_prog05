@@ -23,12 +23,27 @@ static int calcNSumOfSquare(void *arg)
     return 0;
 }
 
-int main()
-{
-    int n = 100; // as parameter for function
+// n as cmd parameter at execution
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        perror("only one argument allowed");
+        exit(1);
+    }
+
+    int n;
+    if(strtol(argv[1], NULL, 10) == 0) // if strtol() fails
+    {
+        perror("only positive integer argument allowed");
+        exit(1);
+    }
+    else
+    {
+        n = strtol(argv[1], NULL, 10); // cast argv[1] to int
+    }
 
     // Allocate stack for child task.
-    // const int STACK_SIZE = 256; // stack size is 8K because of ulimit -s
+    // const int STACK_SIZE = 8192; // stack size is 8K because of ulimit -s
+    
     const int STACK_SIZE = 13*16; // min size is 13*16 = 208 because malloc operates in buckets of 16 bytes 
     // if i just use the 200 bytes needed for the stack, it will override the header of the malloc in front 
     // of the stack at position stack - 8 and a size of uint64_t (8 bytes)
@@ -47,9 +62,6 @@ int main()
         perror("malloc"); // print error message
         exit(1);          // exit with error code 1
     }
-
-    // pointer of header of malloc() is 8 byte (stack - 8)
-    // uint64_t *header = (uint64_t *)(stack - 8); // cast stack - 8 to uint64_t pointer 
 
     // fill stack with 0xAA for watermarking (with a for loop)
     for (int i = 0; i < STACK_SIZE; i++)
@@ -102,6 +114,7 @@ int main()
     int used_stack_size = STACK_SIZE - unused_stack;   // calculate the used stack size (STACK_SIZE - i)
     printf("used stack: %d bytes\n", used_stack_size); // print the used stack size (STACK_SIZE - i)
 
+    // malloc seems to be 16byte aligned so we round up to the next 16 byte word
     // calc used_stack_size / 16 to get the number of 16 byte words
     // calc used_stack_size % 16 to get the number of bytes that are not a 16 byte word
     // if used_stack_size % 16 != 0 then add 1 to the number of 16 byte words
